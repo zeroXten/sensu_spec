@@ -1,0 +1,21 @@
+---
+driver_plugin: vagrant
+driver_config:
+  require_chef_omnibus: true
+
+platforms:
+- name: ubuntu-12.04
+  driver_config:
+    box: opscode-ubuntu-12.04
+    box_url: https://opscode-vm-bento.s3.amazonaws.com/vagrant/opscode_ubuntu-12.04_provisionerless.box
+- name: centos-6.5
+  driver_config:
+    box: opscode_centos-6.5_chef
+    box_url: http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_centos-6.5_chef-provisionerless.box
+
+suites:
+- name: default
+  run_list: ["recipe[sensu_spec]", "recipe[minitest-handler]"]
+  attributes: {}
+settings:
+  parallel: true
