@@ -3,6 +3,9 @@ when 'debian'
   include_recipe 'apt'
 when 'rhel'
   include_recipe 'yum-epel'
+  if node['languages']['python']['version'] =~ /^2\.6/
+    package 'python-argparse'
+  end
 end
 
 directory node['sensu_spec']['conf_dir'] do
@@ -20,7 +23,7 @@ sensu_spec "check procs" do
   command "check_procs"
 end
 
-cookbook_file "/usr/local/bin/sensu_spec_run.py" do
+cookbook_file "/usr/bin/sensu_spec" do
   owner "root"
   group "root"
   mode 0755

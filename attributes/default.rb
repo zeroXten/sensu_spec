@@ -13,3 +13,5 @@ when 'debian'
 end
 
 default['sensu_spec']['default_command_path'] = default['sensu_spec']['nagios']['plugins_path']
+default['sensu_spec']['retry_count'] = 0
+default['sensu_spec']['retry_sleep'] = 1.0
