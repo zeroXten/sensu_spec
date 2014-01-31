@@ -6,5 +6,6 @@ description      'Installs/Configures sensu_spec'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version          '0.2.1'
 
-depends 'apt'
-depends 'yum-epel'
+depends 'apt', '~> 2.3'
+depends 'yum', '~> 3.0'
+depends 'yum-epel', '~> 0.2'

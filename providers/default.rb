@@ -8,6 +8,7 @@ action :create do
   check_data['checks'][name] = {}
   check_data['checks'][name]['interval'] = new_resource.interval
   check_data['checks'][name]['handlers'] = new_resource.handlers
+  check_data['checks'][name]['subscribers'] = new_resource.subscribers
 
   if (Pathname.new new_resource.command).absolute?
     check_data['checks'][name]['command'] = new_resource.command
