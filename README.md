@@ -34,16 +34,11 @@ Something more specific
 You can then run `sensu_spec` from the command line
 
     $ sensu_spec
-    test_critical CRITICAL
-    TESTING CRIT
+    check_http_availability OK
 
-    test_unknown UNKNOWN
-    TESTING UNKNOWN
+    check_ruby_version CRITICAL
+    CRITICAL - Output 'ruby 2.0.0p247 (2013-06-27 revision 41674) [x86_64-darwin13.0.0]' did not match '1.9.3'
 
-    test_warn WARNING
-    TESTING WARN
-
-    test_ok OK
     Some tests failed
 
 This command is automatically run by minitest. See `files/default/test/default_test.rb`.
@@ -58,7 +53,7 @@ See attributes/default.rb for default values.
 * `node['sensu_spec']['nagios']['packages']` - Name of nagios plugins package
 * `node['sensu_spec']['default_command_path']` - Path to use for relative commands
 * `node['sensu_spec']['retry_count']` - Number of times to retry a test
-* `node['sensu_spec']['retry_sleep'] - Number of seconds to sleep between test retries
+* `node['sensu_spec']['retry_sleep']` - Number of seconds to sleep between test retries
 
 Recipes
 -------
