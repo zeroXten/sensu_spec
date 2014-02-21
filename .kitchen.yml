@@ -15,7 +15,7 @@ platforms:
 
 suites:
 - name: default
-  run_list: ["recipe[sensu_spec]", "recipe[minitest-handler]"]
+  run_list: ["recipe[sensu_spec::test]", "recipe[minitest-handler]"]
   attributes: {}
 settings:
   parallel: true
