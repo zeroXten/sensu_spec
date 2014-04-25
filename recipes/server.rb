@@ -8,14 +8,10 @@ else
 end
 
 nodes.each do |client|
-  Chef::Log.debug "HIHIHI"
-  Chef::Log.debug client['sensu_spec']['checks'] 
-  client['sensu_spec']['checks'].each_pair do |check,check_data|
-    file "#{node['sensu_spec']['conf_dir']}/#{node.name.gsub(/[^\w]+/,'_')}-#{check.gsub(/[^\w]+/,'_')}.json" do
-      owner "root"
-      group "root"
-      mode 0644
-      content JSON.pretty_generate(check_data)
-    end
+  file "#{node['sensu_spec']['conf_dir']}/#{node.name.gsub(/[^\w]+/,'_')}.json" do
+    owner "root"
+    group "root"
+    mode 0644
+    content JSON.pretty_generate({:checks => node['sensu_spec']['checks']})
   end
 end
