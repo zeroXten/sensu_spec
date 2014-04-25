@@ -24,6 +24,9 @@ action :create do
     action :nothing
   end
   resource.run_action(:create)
+
+  node.set['sensu_spec']['checks'][name] = check_data['checks'][name]
+
   new_resource.updated_by_last_action(true) if resource.updated_by_last_action?
 end
 

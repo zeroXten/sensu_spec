@@ -7,3 +7,5 @@ end
 sensu_spec 'check_cmd' do
   command 'check_cmd -c "echo hi" -o "hi"'
 end
+
+include_recipe 'sensu_spec::server'
