@@ -5,7 +5,7 @@ else
   checks = {}
 
   search(:node, 'name:*').each do |client|
-    if client.has_key?('sensu_spec')
+    if client.has_key?('sensu_spec') and client['sensu_spec'].has_key?('checks') and (client['sensu_spec']['checks'].kind_of?(Hash) or client['sensu_spec']['checks'].kind_of?(Mash))
       client['sensu_spec']['checks'].each_pair do |name, check_data|
         if check_data['enabled']
 
