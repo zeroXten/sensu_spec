@@ -19,10 +19,6 @@ node['sensu_spec']['nagios']['packages'].each do |pkg|
   package pkg
 end
 
-sensu_spec "check procs" do
-  command "check_procs"
-end
-
 cookbook_file "/usr/bin/sensu_spec" do
   owner "root"
   group "root"

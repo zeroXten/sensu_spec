@@ -15,7 +15,18 @@ platforms:
 
 suites:
 - name: default
-  run_list: ["recipe[sensu_spec::test]", "recipe[minitest-handler]"]
+  run_list: ["recipe[sensu_spec::test_client]", "recipe[minitest-handler]"]
   attributes: {}
+- name: server
+  run_list: ["recipe[sensu_spec::test_server]", "recipe[minitest-handler]"]
+  attributes: {
+    'sensu_spec': {
+      'checks': {
+        'has_check_cmd': {
+          'subscribers': [ 'all','default' ]
+        }
+      }
+    }
+  }
 settings:
   parallel: true

@@ -1,17 +1,30 @@
-require 'json'
-
-if Chef::Config[:solo] 
-  Chef::Log.debug "In solo mode so only using current node"
-  nodes = [node]
+if Chef::Config[:solo]
+  sensu_spec_server 'server'
 else
-  nodes = search(:node, node['sensu_spec']['client_search'])
+
+  checks = {}
+
+  search(:node, 'name:*').each do |client|
+    if client.has_key?('sensu_spec')
+      client['sensu_spec']['checks'].each_pair do |name, check_data|
+        if check_data['enabled']
+
+          Chef::Log.warn("Duplicate sensu check definition found for #{name}. Not replacing") if checks.has_key?(name)
+          check_data.delete('enabled')
+          checks[name] = check_data 
+        end
+      end
+    end
+  end
+
+  checks.each_pair do |name, check_data|
+    file ::File.join(node['sensu_spec']['conf_dir'], "#{name}.json") do
+      owner "root"
+      group "root"
+      mode 0644
+      content JSON.pretty_generate(check_data)
+    end
+  end
+
 end
 
-nodes.each do |client|
-  file "#{node['sensu_spec']['conf_dir']}/#{node.name.gsub(/[^\w]+/,'_')}.json" do
-    owner "root"
-    group "root"
-    mode 0644
-    content JSON.pretty_generate({:checks => node['sensu_spec']['checks']})
-  end
-end
