@@ -1,3 +1,12 @@
+%w[ conf_dir plugin_dir spec_dir ].each do |dir|
+  directory node['sensu_spec'][dir] do
+    owner "root"
+    group "root"
+    mode 0755
+    recursive true
+  end
+end
+
 case node['platform_family']
 when 'debian'
   include_recipe 'apt'
@@ -8,25 +17,10 @@ when 'rhel'
   end
 end
 
-directory node['sensu_spec']['conf_dir'] do
-  owner "root"
-  group "root"
-  mode 0755
-  recursive true
-end
-
-node['sensu_spec']['nagios']['packages'].each do |pkg|
-  package pkg
-end
-
 cookbook_file "/usr/bin/sensu_spec" do
   owner "root"
   group "root"
   mode 0755
 end
 
-cookbook_file File.join(node['sensu_spec']['nagios']['plugins_path'], 'check_cmd') do
-  owner "root"
-  group "root"
-  mode 0755
-end
+include_recipe 'sensu_spec::definitions'

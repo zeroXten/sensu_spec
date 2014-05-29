@@ -3,34 +3,35 @@ if Chef::Config[:solo]
   sensu_spec_server 'server'
 else
   search(:node, 'name:*').each do |client|
+    
+    if client.sensu_spec.checks
+      client.sensu_spec.checks.each_pair do |check_name, check|
+        Chef::Log.debug "Found check #{check_name}"
 
-    client.sensu_spec.checks.each_pair do |check_name, check|
-      Chef::Log.debug "Found check #{check_name}"
+        check_data = check.to_hash
+        check_data['subscribers'] = check_data['subscribers'].inject([]) { |a,(k,v)| a << k if v; a }
 
-      check_data = check.to_hash
-      check_data['subscribers'] = check_data['subscribers'].inject([]) { |a,(k,v)| a << k if v; a }
+        file File.join(node.sensu_spec.conf_dir, "#{check_name}.json") do
+          owner "root"
+          group "root"
+          mode 0644
+          content JSON.pretty_generate(check_data)
+          action :create_if_missing # defensive for now. Not sure what to do if things clash.
+        end
+      end
 
-      file File.join(node.sensu_spec.conf_dir, "#{check_name}.json") do
+      client_data = client.sensu_spec.client.to_hash
+      client_data[:name] = client.fqdn
+      client_data[:address] = client.ipaddress
+      client_data['subscriptions'] = client_data['subscriptions'] ? client_data['subscriptions'].inject([]) { |a,(k,v)| a << k if v; a } : []
+
+      file File.join(node.sensu_spec.conf_dir, "#{node.fqdn}.json") do
         owner "root"
         group "root"
         mode 0644
-        content JSON.pretty_generate(check_data)
-        action :create_if_missing # defensive for now. Not sure what to do if things clash.
+        content JSON.pretty_generate(client_data)
       end
-    end
-
-    client_data = client.sensu_spec.client.to_hash
-    client_data[:name] = client.fqdn
-    client_data[:address] = client.ipaddress
-    client_data['subscriptions'] = client_data['subscriptions'] ? client_data['subscriptions'].inject([]) { |a,(k,v)| a << k if v; a } : []
-
-    file File.join(node.sensu_spec.conf_dir, "#{node.fqdn}.json") do
-      owner "root"
-      group "root"
-      mode 0644
-      content JSON.pretty_generate(client_data)
-    end
-
+    end rescue NoMethodError
   end
 end
 

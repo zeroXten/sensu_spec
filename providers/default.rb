@@ -25,10 +25,11 @@ action :create do
 
           old = node.sensu_spec.client.to_hash
           new = full_match_name.split('.').reverse.inject(matches[match_name]) { |a,n| { n => a } }
-          Chef::Log.debug "Merging #{new} into #{old}"
-          result = Chef::Mixin::DeepMerge.merge(old,new)
+          Chef::Log.debug "Merging #{new} into #{old} (#{old.class})"
+          result = Chef::Mixin::DeepMerge.merge(new,old)
           Chef::Log.debug "Result is #{result}"
           node.default.sensu_spec.client = result
+          Chef::Log.debug "Node attributes updated"
         end
 
         subscriber_name = context.split('.').first
@@ -51,7 +52,7 @@ action :create do
     owner "root"
     group "root"
     mode 0644
-    content JSON.pretty_generate(spec_data)
+    content JSON.pretty_generate({ :checks => spec_data})
     action :nothing
   end
   r.run_action(:create)

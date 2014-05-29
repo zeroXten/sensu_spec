@@ -21,6 +21,12 @@ class SensuSpec:
     }
 
     self.options = {}
+    
+    path = os.getenv('PATH').split(':')
+    path.append('/etc/sensu/plugins')
+    path.append('/usr/lib/nagios/plugins')
+    path.append('/usr/lib64/nagios/plugins')
+    os.putenv('PATH', ":".join(path))
 
   def args(self,args):
     self.options = vars(args)
@@ -41,6 +47,8 @@ class SensuSpec:
 
   def run_test(self, check, data):
     command = data['command']
+
+    
     sys.stdout.write(check+" ")
 
     for i in range(self.options['retry'] + 1):
