@@ -90,7 +90,7 @@ class SensuSpec:
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
-  parser.add_argument("-p", "--path", help="Path containing sensu client config", default="/etc/sensu/conf.d/")
+  parser.add_argument("-p", "--path", help="Path containing sensu client config", default="/etc/sensu/specs/")
   parser.add_argument("-r", "--retry", help="Number of times to retry a test", type=int, default=0)
   parser.add_argument("-s", "--sleep", help="Seconds to sleep between test retries", type=float, default=5.0)
 

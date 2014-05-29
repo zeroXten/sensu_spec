@@ -16,12 +16,12 @@ done
 output=$($COMMAND 2>&1)
 exit_code=$?
 
-if [ -n "$CHECK_EXIT" ] && [ "$exit_code" -ne "$CHECK_EXIT" ]; then
+if [[ -n "$CHECK_EXIT" ]] && [[ "$exit_code" -ne "$CHECK_EXIT" ]]; then
   echo "CRITICAL - Exit code $exit_code didn't match $CHECK_EXIT"
   exit 2
 fi
 
-if [ -n "$CHECK_OUTPUT" ] && [ -z $(echo "$output" | grep "$CHECK_OUTPUT") ]; then
+if [[ -n "$CHECK_OUTPUT" ]] && [[ -z $(echo "$output" | grep "$CHECK_OUTPUT") ]]; then
   echo "CRITICAL - Output '${output}' did not match '${CHECK_OUTPUT}'"
   exit 2
 fi
