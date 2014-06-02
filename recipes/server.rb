@@ -11,58 +11,45 @@ else
         check_data = check.to_hash
         check_data['subscribers'] = check_data['subscribers'].inject([]) { |a,(k,v)| a << k if v; a }
 
+        # probably need to add logic here to create granular checks
+        %w[ handlers interval ].each do |attr|
+          if not check.has_key?(attr)
+            Chef::Log.debug "Attribute #{attr} not found for check #{check_name} on client"
+            if node.sensu_spec.checks.has_key?(check_name) and node.sensu_spec.checks[check_name].has_key?(attr)
+              Chef::Log.debug "Using value from sensu server"
+              check_data[attr] = node.sensu_spec.checks[check_name][attr]
+            elsif node.sensu_spec.check_defaults.has_key?(attr)
+              Chef::Log.debug "Using defaults set in cookbook"
+              check_data[attr] = node.sensu_spec.check_defaults[attr]
+            else
+              Chef::Log.debug "No defaults found, not setting a value"
+            end
+          else
+            Chef::Log.debug "Using value for #{attr} from client check"
+          end
+        end
+
         file File.join(node.sensu_spec.conf_dir, "#{check_name}.json") do
           owner "root"
           group "root"
           mode 0644
-          content JSON.pretty_generate(check_data)
+          content JSON.pretty_generate({ :checks => { check_name => check_data } })
           action :create_if_missing # defensive for now. Not sure what to do if things clash.
         end
       end
 
-      client_data = client.sensu_spec.client.to_hash
-      client_data[:name] = client.fqdn
-      client_data[:address] = client.ipaddress
-      client_data['subscriptions'] = client_data['subscriptions'] ? client_data['subscriptions'].inject([]) { |a,(k,v)| a << k if v; a } : []
-
-      file File.join(node.sensu_spec.conf_dir, "#{node.fqdn}.json") do
-        owner "root"
-        group "root"
-        mode 0644
-        content JSON.pretty_generate(client_data)
-      end
     end rescue NoMethodError
   end
 end
 
-=begin
-if Chef::Config[:solo]
-  sensu_spec_server 'server'
-else
+client_data = node.sensu_spec.client.to_hash
+client_data[:name] = node.fqdn
+client_data[:address] = node.ipaddress
+client_data['subscriptions'] = client_data['subscriptions'] ? client_data['subscriptions'].inject([]) { |a,(k,v)| a << k if v; a } : []
 
-  checks = {}
-
-  search(:node, 'name:*').each do |client|
-    if client.has_key?('sensu_spec') and client['sensu_spec'].has_key?('checks') and (client['sensu_spec']['checks'].kind_of?(Hash) or client['sensu_spec']['checks'].kind_of?(Mash))
-      client['sensu_spec']['checks'].each_pair do |name, check_data|
-        if check_data['enabled']
-
-          Chef::Log.warn("Duplicate sensu check definition found for #{name}. Not replacing") if checks.has_key?(name)
-          check_data.delete('enabled')
-          checks[name] = check_data 
-        end
-      end
-    end
-  end
-
-  checks.each_pair do |name, check_data|
-    file ::File.join(node['sensu_spec']['conf_dir'], "#{name}.json") do
-      owner "root"
-      group "root"
-      mode 0644
-      content JSON.pretty_generate(check_data)
-    end
-  end
-
+file File.join(node.sensu_spec.conf_dir, "client.json") do
+  owner "root"
+  group "root"
+  mode 0644
+  content JSON.pretty_generate({ :client => client_data })
 end
-=end

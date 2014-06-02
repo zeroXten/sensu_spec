@@ -1,3 +1,11 @@
+define /fails with message ['"]?(?<message>.*?)['"]?/ do
+  command 'always-critical ":::message:::"'
+  code <<-EOF
+    #!/bin/bash
+    echo "CRITICAL - $1"; exit 2
+  EOF
+end
+
 define /must have command (?<name>.*)/ do
   command 'check-command :::name:::'
   code <<-EOF
@@ -58,10 +66,9 @@ define /must match "(?<match>.+?)" when I run "(?<command>.+)"/ do
     command="$1"
     match="$2"
 
-    which pcregrep >/dev/null 2>&1 || { echo "UNKNOWN - Cannot find pcregrep"; exit 3; }
     output=$($command 2>&1)
     
-    echo "$output" | pcregrep -q -M "$2" || { echo "CRITICAL - Output for '$command' did not match '$match'. Got '$output' instead."; exit 2; }
+    echo "$output" | xargs | egrep -q "$2" || { echo "CRITICAL - Output for '$command' did not match '$match'. Got '$output' instead."; exit 2; }
     echo "OK - Command '$command' output matched '$match'"; exit 0
   EOF
 end

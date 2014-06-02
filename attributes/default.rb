@@ -11,7 +11,5 @@ default.sensu_spec.definitions = Mash.new
 default.sensu_spec.client = Mash.new
 default.sensu_spec.checks = Mash.new
 
-#default['sensu_spec']['checks_default']['subscribers'] = ['default']
-#default['sensu_spec']['checks_default']['handlers'] = ['default']
-#default['sensu_spec']['checks_default']['interval'] = 60
-
+default.sensu_spec.check_defaults.handlers = ['default']
+default.sensu_spec.check_defaults.interval = 60
