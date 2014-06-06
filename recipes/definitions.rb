@@ -50,7 +50,7 @@ define /must have (?<count>\d+) (?<name>.+?) process(?:es)?/ do
 end
 
 define /must have (?<count>\d+) (?<name>.+?) process(?:es)? with args (?<args>.*)/ do
-  command 'check-procs-args :::name::: :::count::: :::args:::'
+  command 'check-procs-args :::name::: :::count::: ":::args:::"'
   code <<-EOF
     #!/bin/bash
     num_procs=$(ps --no-headers -f -C $1 | grep $3 | wc -l)
