@@ -7,4 +7,5 @@
 # All rights reserved - Do Not Redistribute
 #
 
+include_recipe "sensu_spec::base"
 include_recipe "sensu_spec::client"

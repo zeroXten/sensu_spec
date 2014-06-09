@@ -5,14 +5,19 @@ require 'pathname'
 action :create do
   name = new_resource.name # e.g. 'must have 1 java process with args logstash/server'
   context = new_resource.context # e.g. 'logstash_server.process'
+  Chef::Log.debug "Processing spec for '#{name}' in context #{context}" 
 
   check_name = "check_#{context.gsub(/\./,'_')}"
 
   spec_data = {}
 
+  definition_found = false
+
   node.sensu_spec.definitions.each_pair do |definition_name, definition|
     if matches = /^#{definition[:pattern]}$/.match(name)
+      definition_found = true
       Chef::Log.debug "Found matching definition for '#{name}': #{definition[:pattern]}' with command '#{definition[:command]}'"
+
       if spec_data.has_key?(check_name)
         Chef::Log.warn "Duplicate definition for '#{name}'. Ignoring '#{definition[:pattern]}'"
       else
@@ -26,7 +31,7 @@ action :create do
           old = node.sensu_spec.client.to_hash
           new = full_match_name.split('.').reverse.inject(matches[match_name]) { |a,n| { n => a } }
           Chef::Log.debug "Merging #{new} into #{old} (#{old.class})"
-          result = Chef::Mixin::DeepMerge.merge(new,old)
+          result = Chef::Mixin::DeepMerge.deep_merge!(new,old)
           Chef::Log.debug "Result is #{result}"
           node.set.sensu_spec.client = result
           Chef::Log.debug "Node attributes updated"
@@ -46,8 +51,13 @@ action :create do
         node.set.sensu_spec[:checks][check_name][:subscribers][subscriber_name] = true
 
       end 
-
+      break
     end
+  end
+
+  unless definition_found
+    Chef::Log.fatal "No matching definition found for '#{name}'"
+    raise
   end
 
   r = file ::File.join(node.sensu_spec.spec_dir, "#{check_name}.json") do

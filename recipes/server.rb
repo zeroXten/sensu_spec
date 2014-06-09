@@ -34,7 +34,8 @@ else
           group "root"
           mode 0644
           content JSON.pretty_generate({ :checks => { check_name => check_data } })
-          action :create_if_missing # defensive for now. Not sure what to do if things clash.
+          notifies :restart, 'sensu_service[sensu-server]' if node.recipes.include?('sensu::server_service')
+          notifies :restart, 'sensu_service[sensu-api]' if node.recipes.include?('sensu::api_service')
         end
       end
 
@@ -52,4 +53,5 @@ file File.join(node.sensu_spec.conf_dir, "client.json") do
   group "root"
   mode 0644
   content JSON.pretty_generate({ :client => client_data })
+  notifies :restart, 'sensu_service[sensu-client]' if node.recipes.include?('sensu::client_service')
 end
