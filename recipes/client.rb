@@ -4,12 +4,19 @@ client_data[:name] = node.fqdn
 client_data[:address] = node.ipaddress
 client_data['subscriptions'] = client_data['subscriptions'] ? client_data['subscriptions'].inject([]) { |a,(k,v)| a << k if v; a } : []
 
-if node.recipes.include?('sensu::client_service')
-  file File.join(node.sensu_spec.conf_dir, "client.json") do
-    owner "root"
-    group "root"
-    mode 0644
-    content lazy { JSON.pretty_generate({ :client => client_data }) }
-    notifies :restart, 'sensu_service[sensu-client]'
+unless run_context.resource_collection.include?('ruby_block[sensu_service_trigger]')
+  ruby_block 'sensu_service_trigger' do
+    block do 
+      Chef::Log.debug "Dummy sensu_service_trigger"
+    end
+    action :nothing
   end
+end
+
+file File.join(node.sensu_spec.conf_dir, "client.json") do
+  owner "root"
+  group "root"
+  mode 0644
+  content lazy { JSON.pretty_generate({ :client => client_data }) }
+  notifies :restart, 'ruby_block[sensu_service_trigger]'
 end
