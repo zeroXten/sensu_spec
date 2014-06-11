@@ -30,6 +30,16 @@ define /must have (?<action>readable|writable|executable) file (?<file>.*)/ do
   EOF
 end
 
+define /must have file (?<file>.+) containing ['"]?(?<pattern>.+?)['"]?/ do
+  command 'check-file-contains ":::file:::" ":::pattern:::"'
+  code <<-EOF
+    #!/bin/bash
+    egrep -q "$2" "$1" || { echo "CRITICAL - File $1 does not contain pattern $2"; exit 2; }
+    echo "OK - File $1 contains pattern $2"; exit 0
+  EOF
+end
+
+
 define /must have directory (?<dir>.*)/ do
   command 'check-dir :::dir:::'
   code <<-EOF
@@ -39,13 +49,29 @@ define /must have directory (?<dir>.*)/ do
   EOF
 end
 
-define /must have (?<count>\d+) (?<name>.+?) process(?:es)?/ do
-  command 'check-procs :::name::: :::count:::'
+define /must have (?<comparison>at least|at most) ?(?<count>\d+) (?<name>.+?) process(?:es)?/ do
+  command 'check-procs :::name::: :::count::: ":::comparison:::"'
   code <<-EOF
     #!/bin/bash
+
+    name="$1"
+    count="$2"
+    comparison="${3:-exactly}"
+
     num_procs=$(ps --no-headers -f -C $1 | wc -l)
-    [[ $num_procs != $2 ]] && { echo "CRITICAL - $num_procs $1 process(es) found. Expected $2"; exit 2; }
-    echo "OK - $2 $1 process(es) found"; exit 0
+
+    ok='false'
+    case "$comparison" in
+      "at least") [[ $num_procs -ge $count ]];;
+      "at most") [[ $num_procs -le $count ]];;
+      *) [[ $num_procs -eq $count ]];;
+    esac
+
+    if [[ $? -eq 0 ]]; then
+      echo "OK - $count $name process(es) found"; exit 0
+    else
+      echo "CRITICAL - $num_procs $name process(es) found. Expected $comparison $count"; exit 2
+    fi
   EOF
 end
 

@@ -30,7 +30,7 @@ define /must have process (?<process>.+?) with args (?<args>.+?) listening on (?
       echo "UNKNOWN - ps output file does not exist"; exit 3
     fi
 
-    pid=$(awk "{ if (\$1 == \"$proto\" && \$4 ~ /$address/) { print \$NF } }" /var/tmp/netstat-output | cut -d'/' -f1)
+    pid=$(awk "{ if (\$1 == \"$proto\" && \$4 ~ /$address/) { print \$NF } }" /var/tmp/netstat-output | uniq | cut -d'/' -f1)
     if [[ -z "$pid" ]]; then
       echo "CRITICAL - Could not find a process listening on ${proto} ${address}"; exit 2
     fi
