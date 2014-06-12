@@ -37,7 +37,7 @@ define /must have file (?<file>.+?) containing ['"]?(?<pattern>.+?)['"]?/ do
     file="$1"
     pattern="$2"
 
-    egrep -q "$pattern" "$file" || { echo "CRITICAL - Could not find pattern '$pattern' in $file"; exit 2 }
+    egrep -q "$pattern" "$file" || { echo "CRITICAL - Could not find pattern '$pattern' in $file"; exit 2; }
     echo "OK - Found pattern '$pattern' in $file"; exit 0 
   EOF
 end
