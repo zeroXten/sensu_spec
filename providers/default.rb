@@ -28,9 +28,10 @@ action :create do
           full_match_name = "#{context}.#{match_name}"
           check_command = check_command.gsub(":::#{match_name}:::", ":::#{full_match_name}:::")
 
-          old = node.sensu_spec.client.to_hash
+          #old = node.sensu_spec.client.to_hash
+          old = node.sensu_spec.to_hash[:client]
           new = full_match_name.split('.').reverse.inject(matches[match_name]) { |a,n| { n => a } }
-          Chef::Log.debug "Merging #{new} into #{old} (#{old.class})"
+          Chef::Log.debug "Merging #{new} (#{new.class}) into #{old} (#{old.class})"
           result = Chef::Mixin::DeepMerge.deep_merge!(new,old)
           Chef::Log.debug "Result is #{result}"
           node.set.sensu_spec.client = result

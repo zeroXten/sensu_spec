@@ -49,7 +49,7 @@ define /must have (?<count>\d+) (?<name>.+?) process(?:es)?/ do
   EOF
 end
 
-define /must have (?<comparison>at least|at most|exactly) ?(?<count>\d+) (?<name>.+?) process(?:es)?/ do
+define /must have (?<comparison>at least|at most|exactly) (?<count>\d+) (?<name>.+?) process(?:es)?/ do
   command 'check-procs-comp :::name::: :::count::: ":::comparison:::"'
   code <<-EOF
     #!/bin/bash
