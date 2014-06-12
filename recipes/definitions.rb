@@ -30,6 +30,18 @@ define /must have (?<action>readable|writable|executable) file (?<file>.*)/ do
   EOF
 end
 
+define /must have file (?<file>\+?) containing ['"]?(?<pattern>.+?)['"]?/ do
+  command 'check-file-contains ":::file:::" ":::pattern:::"'
+  code <<-EOF
+    #!/bin/bash
+    file="$1"
+    pattern="$2"
+
+    egrep -q "$pattern" "$file" || { echo "CRITICAL - Could not find pattern '$pattern' in $file"; exit 2 }
+    echo "OK - Found pattern '$pattern' in $file"; exit 0 
+  EOF
+end
+
 define /must have directory (?<dir>.*)/ do
   command 'check-dir :::dir:::'
   code <<-EOF
