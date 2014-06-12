@@ -30,7 +30,7 @@ define /must have (?<action>readable|writable|executable) file (?<file>.*)/ do
   EOF
 end
 
-define /must have file (?<file>\+?) containing ['"]?(?<pattern>.+?)['"]?/ do
+define /must have file (?<file>.+?) containing ['"]?(?<pattern>.+?)['"]?/ do
   command 'check-file-contains ":::file:::" ":::pattern:::"'
   code <<-EOF
     #!/bin/bash
