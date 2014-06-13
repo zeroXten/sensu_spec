@@ -45,7 +45,7 @@ else
 end
 
 client_data = node.sensu_spec.client.to_hash
-client_data[:name] = node.fqdn
+client_data[:name] = node.attribute?(:fqdn) ? node.fqdn : node.name
 client_data[:address] = node.ipaddress
 client_data['subscriptions'] = client_data['subscriptions'] ? client_data['subscriptions'].inject([]) { |a,(k,v)| a << k if v; a } : []
 
