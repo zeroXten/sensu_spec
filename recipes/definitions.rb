@@ -1,4 +1,4 @@
-define /fails with message ['"]?(?<message>.*?)['"]?/ do
+define /(?:must fail|fails) with message ['"]?(?<message>.*?)['"]?/ do
   command 'always-critical ":::message:::"'
   code <<-EOF
     #!/bin/bash
