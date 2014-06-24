@@ -1,11 +1,4 @@
-%w[ conf_dir plugin_dir spec_dir ].each do |dir|
-  directory node['sensu_spec'][dir] do
-    owner "root"
-    group "root"
-    mode 0755
-    recursive true
-  end
-end
+include_recipe 'sensu_spec::client'
 
 define /must have (?<count>\d+) (?<name>\w+) animals?/ do
   command 'check_animal ":::name::: count is :::count:::"'
@@ -58,5 +51,4 @@ describe 'elasticsearch' do
   end
 end
 
-# Pretend to be a sensu server
 include_recipe 'sensu_spec::server'

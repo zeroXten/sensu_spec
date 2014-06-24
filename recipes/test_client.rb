@@ -1,5 +1,4 @@
-include_recipe 'sensu_spec::base'
-include_recipe 'sensu_spec::definitions'
+include_recipe 'sensu_spec::client'
 
 describe 'sensu_spec test' do
 
@@ -40,4 +39,3 @@ describe 'sensu_spec test' do
   end
 
 end
-include_recipe 'sensu_spec::client'
