@@ -7,7 +7,7 @@ action :create do
     check_data['subscribers'] = check_data['subscribers'].inject([]) { |a,(k,v)| a << k if v; a }
 
     # probably need to add logic here to create granular checks
-    %w[ handlers interval ].each do |attr|
+    node.sensu_spec.check_defaults.keys.each do |attr|
       if not check.has_key?(attr)
         Chef::Log.debug "Attribute #{attr} not found for check #{check_name} on client"
         if node.sensu_spec.checks.has_key?(check_name) and node.sensu_spec.checks[check_name].has_key?(attr)
