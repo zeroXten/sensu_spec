@@ -15,7 +15,7 @@ platforms:
 
 suites:
 - name: default
-  run_list: ["recipe[sensu_spec::test_client]", "recipe[minitest-handler]"]
+  run_list: ["recipe[sensu_spec::test_client]", "recipe[sensu_spec::extra]", "recipe[minitest-handler]"]
   attributes: {}
 - name: server
   run_list: ["recipe[sensu_spec::test_server]", "recipe[minitest-handler]"]
