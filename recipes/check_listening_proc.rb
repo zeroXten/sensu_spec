@@ -1,5 +1,5 @@
 # Need root to see pid for listening process. Using cron do dump data to file that can be checked
-collection_command = '/bin/netstat -npl > /var/tmp/netstat-output 2>&1 && /bin/ps ax --no-headers -o pid,comm,args > /var/tmp/ps-output 2>&1'
+collection_command = 'n=$(/bin/netstat -npl 2>&1); echo "$n" > /var/tmp/netstat-output; p=$(/bin/ps ax --no-headers -o pid,comm,args 2>&1); echo "$p" > /var/tmp/ps-output'
 
 # Run the first time if required
 bash 'collect_process_data' do
