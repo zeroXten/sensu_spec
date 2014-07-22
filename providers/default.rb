@@ -9,32 +9,52 @@ action :create do
 
   check_name = "check_#{context.gsub(/\./,'_')}"
 
-  spec_data = {}
+  check_data = {}
+  node.run_state[:sensu_client] ||= {}
+  node.run_state[:sensu_checks] ||= {}
+  node.run_state[:sensu_definitions] ||= {}
 
   definition_found = false
 
-  node.sensu_spec.definitions.each_pair do |definition_name, definition|
+  node.run_state[:sensu_definitions].each_pair do |definition_name, definition|
     if matches = /^#{definition[:pattern]}$/.match(name)
       definition_found = true
       Chef::Log.debug "Found matching definition for '#{name}': #{definition[:pattern]}' with command '#{definition[:command]}'"
 
-      if spec_data.has_key?(check_name)
-        Chef::Log.warn "Duplicate definition for '#{name}'. Ignoring '#{definition[:pattern]}'"
-      else
-        spec_command = check_command = definition[:command]
-        matches.names.each do |match_name|
-          spec_command = spec_command.gsub(":::#{match_name}:::", matches[match_name])
+      spec_command = check_command = definition[:command]
+      matches.names.each do |match_name|
+        full_match_name = "#{context}.#{match_name}"
+        check_command = check_command.gsub(":::#{match_name}:::", ":::#{full_match_name}:::")
+        
+        old = node.run_state.to_hash[:sensu_client]
+        new = full_match_name.split('.').reverse.inject(matches[match_name]) { |a,n| { n => a } }
+        result = Chef::Mixin::DeepMerge.deep_merge!(new,old)
+        Chef::Log.debug "Merged matches. New client state is #{result}"
+        node.run_state[:sensu_client] = result
+      end
 
-          full_match_name = "#{context}.#{match_name}"
-          check_command = check_command.gsub(":::#{match_name}:::", ":::#{full_match_name}:::")
+      Chef::Log.debug "Setting check_command to: #{check_command}"
+      check_data[:command] = check_command
+      check_data[:standalone] = true
 
-          old = node.sensu_spec.to_hash["client"]
-          new = full_match_name.split('.').reverse.inject(matches[match_name]) { |a,n| { n => a } }
-          Chef::Log.debug "Merging #{new} (#{new.class}) into #{old} (#{old.class})"
-          result = Chef::Mixin::DeepMerge.deep_merge!(new,old)
-          Chef::Log.debug "Result is #{result}"
-          node.set.sensu_spec.client = result
-          Chef::Log.debug "Node attributes updated"
+      # probably need to add logic here to create granular checks
+      node.sensu_spec.check_defaults.keys.each do |attr|
+        if not check_data.has_key?(attr)
+          Chef::Log.debug "Using defaults set in cookbook"
+          check_data[attr] = node.sensu_spec.check_defaults[attr]
+        else
+          Chef::Log.debug "Using value for #{attr} from client check"
+        end
+      end
+
+    end
+  end
+
+  node.run_state[:sensu_checks][check_name] = check_data
+end
+
+=begin
+
         end
 
         subscriber_name = context.split('.').first
@@ -60,19 +80,10 @@ action :create do
     raise
   end
 
-  r = file ::File.join(node.sensu_spec.spec_dir, "#{check_name}.json") do
-    owner "root"
-    group "root"
-    mode 0644
-    content JSON.pretty_generate({ :checks => spec_data})
-    action :nothing
-  end
-  r.run_action(:create)
-  new_resource.updated_by_last_action(true) if r.updated_by_last_action?
 
 end
 
-
+=end
 
 
 

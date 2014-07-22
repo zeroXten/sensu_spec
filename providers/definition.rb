@@ -9,6 +9,8 @@ def unindent(string)
 end
 
 action :create do
+  node.run_state[:sensu_definitions] ||= {}
+
   ruby_block "create definition #{new_resource.name}" do
     block do 
 
@@ -16,7 +18,7 @@ action :create do
       name = definition[:pattern].to_s.gsub(/[^\w]/,'')
 
       Chef::Log.debug "Creating sensu_spec definition: #{definition[:pattern]}"
-      node.default.sensu_spec.definitions[name] = definition
+      node.run_state[:sensu_definitions][name] = definition
 
     end
   end

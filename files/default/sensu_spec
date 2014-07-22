@@ -1,14 +1,23 @@
 #!/usr/bin/env python
 
-from glob import glob
-from pprint import pprint
 import json
 import subprocess
 import sys
 import argparse
 import os
 import time
+import collections
+import re
 
+def flatten(d, parent_key='', sep='_'):
+  items = []
+  for k,v in d.items():
+    new_key = parent_key + sep + k if parent_key else k
+    if isinstance(v, collections.MutableMapping):
+      items.extend(flatten(v, new_key).items())
+    else:
+      items.append((new_key, v))
+  return dict(items)
 
 class SensuSpec:
 
@@ -21,11 +30,15 @@ class SensuSpec:
     }
 
     self.options = {}
-    
+
     path = os.getenv('PATH').split(':')
     path.append('/etc/sensu/plugins')
     path.append('/usr/lib/nagios/plugins')
     path.append('/usr/lib64/nagios/plugins')
+
+    if os.path.isdir('/opt/sensu/embedded/bin'):
+      path.append('/opt/sensu/embedded/bin')
+
     os.putenv('PATH', ":".join(path))
 
   def args(self,args):
@@ -33,23 +46,33 @@ class SensuSpec:
 
   def run(self):
     self.read_files()
-    self.print_output()
+    self.run_tests()
+    self.print_summary()
 
   def read_files(self):
-    for file in glob(os.path.join(self.options['path'],"*.json")):
-      fh = open(file)
-      json_data = json.load(fh)
-      fh.close()
+    fh = open(self.options['path'] + '/client.json')
+    self.client_data = flatten(json.load(fh)['client'])
+    fh.close()
 
-      for check in json_data['checks']:
-        self.run_test(check,json_data['checks'][check])
+    fh = open(self.options['path'] + '/checks.json')
+    self.check_data = json.load(fh)
+    fh.close()
 
+  def run_tests(self):
+    for check in self.check_data['checks']:
+      self.run_test(check)
 
-  def run_test(self, check, data):
+  def run_test(self, check):
+    data = self.check_data['checks'][check]
     command = data['command']
 
-    
     sys.stdout.write(check+" ")
+
+    for arg in re.findall(':::(?:.+?):::', command):
+      clean = re.sub(':::', '', arg)
+      name = re.sub('\.', '_', clean)
+      value = self.client_data[name]
+      command = re.sub(arg, value, command)
 
     for i in range(self.options['retry'] + 1):
       process = subprocess.Popen(command, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -66,20 +89,23 @@ class SensuSpec:
       self.status_count['ok'] += 1
     elif (exit_code == 1):
       print "WARNING"
-      print stdout
+      print "  Command run: " + command
+      print "  Output: " + stdout
       self.status_count['warning'] += 1
     elif (exit_code == 2):
       print "CRITICAL"
-      print stdout
+      print "  Command run: " + command
+      print "  Output: " + stdout
       self.status_count['critical'] += 1
     else:
       print "UNKNOWN"
-      print stdout
+      print "  Command run: " + command
+      print "  Output: " + stdout
       self.status_count['unknown'] += 1
 
     return exit_code
 
-  def print_output(self):
+  def print_summary(self):
     total = sum(self.status_count.values())
 
     if (total == 0):
@@ -95,10 +121,9 @@ class SensuSpec:
       print "All tests passed"
       sys.exit(0)
 
-
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
-  parser.add_argument("-p", "--path", help="Path containing sensu client config", default="/etc/sensu/specs/")
+  parser.add_argument("-p", "--path", help="Path containing sensu client config", default="/etc/sensu/conf.d/")
   parser.add_argument("-r", "--retry", help="Number of times to retry a test", type=int, default=0)
   parser.add_argument("-s", "--sleep", help="Seconds to sleep between test retries", type=float, default=5.0)
 
