@@ -1,4 +1,12 @@
-include_recipe "sensu_spec::base"
+unless run_context.resource_collection.include?('ruby_block[sensu_service_trigger]')
+  include_recipe "sensu_spec::base"
+  ruby_block 'sensu_service_trigger' do
+    block do
+      Chef::Log.debug "Dummy sensu_service_trigger"
+    end
+    action :nothing
+  end
+end
 include_recipe "sensu_spec::definitions"
 
 case node['platform_family']
@@ -17,14 +25,6 @@ cookbook_file "/usr/bin/sensu_spec" do
   mode 0755
 end
 
-unless run_context.resource_collection.include?('ruby_block[sensu_service_trigger]')
-  ruby_block 'sensu_service_trigger' do
-    block do
-      Chef::Log.debug "Dummy sensu_service_trigger"
-    end
-    action :nothing
-  end
-end
 
 client_data = {}
 client_data[:name] = node.attribute?(:fqdn) ? node.fqdn : node.name
