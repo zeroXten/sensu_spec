@@ -6,5 +6,6 @@ default['sensu_spec']['default_command_path'] = default['sensu_spec']['nagios'][
 default['sensu_spec']['retry_count'] = 0
 default['sensu_spec']['retry_sleep'] = 1.0
 
+default.sensu_spec.client_defaults.subscriptions = ['default']
 default.sensu_spec.check_defaults.handlers = ['default']
 default.sensu_spec.check_defaults.interval = 60

@@ -53,38 +53,3 @@ action :create do
   node.run_state[:sensu_checks][check_name] = check_data
 end
 
-=begin
-
-        end
-
-        subscriber_name = context.split('.').first
-        Chef::Log.debug "Adding subscriber #{subscriber_name}"
-        node.set.sensu_spec.client.subscriptions[subscriber_name] = true
-        Chef::Log.debug "Adding subscriber #{node.fqdn}"
-        node.set.sensu_spec.client.subscriptions[node.fqdn] = true
-
-        Chef::Log.debug "Setting spec_command to: #{spec_command}"
-        spec_data[check_name] = { :command => spec_command }
-
-        Chef::Log.debug "Setting check_command to #{check_command}"
-        node.set.sensu_spec[:checks][check_name][:command] = check_command
-        node.set.sensu_spec[:checks][check_name][:subscribers][subscriber_name] = true
-
-      end 
-      break
-    end
-  end
-
-  unless definition_found
-    Chef::Log.fatal "No matching definition found for '#{name}'"
-    raise
-  end
-
-
-end
-
-=end
-
-
-
-

@@ -29,6 +29,7 @@ end
 client_data = {}
 client_data[:name] = node.attribute?(:fqdn) ? node.fqdn : node.name
 client_data[:address] = node.ipaddress
+client_data[:subscriptions] = node.sensu_spec.client_defaults.subscriptions
 
 node.run_state[:sensu_client] ||= {}
 node.run_state[:sensu_checks] ||= {}
