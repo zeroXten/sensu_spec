@@ -2,8 +2,8 @@ actions :create
 default_action :create
 
 attribute :name, :kind_of => String, :name_attribute => true
-attribute :context, :kind_of => String, :default => 'default'
-#attribute :description, :kind_of => String
+attribute :specs, :kind_of => Array
+attribute :description, :kind_of => String
 #attribute :tags, :kind_of => Array, :default => []
 
 #attribute :command, :kind_of => String
