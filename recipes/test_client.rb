@@ -38,11 +38,6 @@ describe 'sensu_spec test' do
     it 'must match "hello" when I run "echo hello"'
   end
 
-  describe 'levels' do
-    it 'must match "hello" when I run "echo hello"'
-    it 'should match "badger" when I run "echo hello"'
-  end
-
   describe 'with' do
     it 'must match "hello" when I run "echo hello"'
     with :tags => ['sla-testing','hello']

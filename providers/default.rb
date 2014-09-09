@@ -47,12 +47,12 @@ action :create do
         check_data[:standalone] = true
 
         # probably need to add logic here to create granular checks
-        node.sensu_spec.check_defaults.keys.each do |attr|
-          if not check_data.has_key?(attr)
-            Chef::Log.debug "Using defaults set in cookbook"
-            check_data[attr] = node.sensu_spec.check_defaults[attr]
-          else
+        node.sensu_spec.check_defaults.each_pair do |attr, value|
+          if check_data.has_key?(attr)
             Chef::Log.debug "Using value for #{attr} from client check"
+          elsif value
+            Chef::Log.debug "Using defaults set in cookbook"
+            check_data[attr] = value
           end
         end
 
