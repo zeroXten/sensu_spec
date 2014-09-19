@@ -8,7 +8,7 @@ action :create do
   description = new_resource.description
 
   Chef::Log.debug "Processing specs for '#{name}'"
-  with_data = {}
+  with_data = Mash.new
   specs.map { |e| e.values.first if e.keys.first == :with }.compact.each do |with|
     with_data = Chef::Mixin::DeepMerge.deep_merge!(with, with_data)
   end
@@ -19,9 +19,9 @@ action :create do
 
     check_data = with_data.clone
     check_data[:description] = description
-    node.run_state[:sensu_client] ||= {}
-    node.run_state[:sensu_checks] ||= {}
-    node.run_state[:sensu_definitions] ||= {}
+    node.run_state[:sensu_client] ||= Mash.new
+    node.run_state[:sensu_checks] ||= Mash.new
+    node.run_state[:sensu_definitions] ||= Mash.new
 
     definition_found = false
 

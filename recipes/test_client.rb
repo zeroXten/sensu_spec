@@ -2,6 +2,16 @@ include_recipe 'sensu_spec::client'
 
 describe 'sensu_spec test' do
 
+  describe 'three levels deep' do
+    describe 'the actual test' do
+      it 'must pass with message "three levels"'
+    end
+
+    describe 'another test' do
+      it 'must pass with message "three levels 2"'
+    end
+  end
+
   describe 'fail' do
     it 'must fail with message "it worked"'
   end
@@ -43,4 +53,8 @@ describe 'sensu_spec test' do
     with :tags => ['sla-testing','hello']
   end
 
+  describe 'with override' do
+    it 'must pass with message "badger"'
+    with interval: 120
+  end
 end

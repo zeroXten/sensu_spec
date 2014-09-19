@@ -36,8 +36,8 @@ class Chef
           description desc
         end
       end
-      Chef::Log.debug "End of describe, resetting tre"
-      node.run_state['sensu_spec_tree'] = node.run_state['sensu_spec_tree'][0..index-1]
+      Chef::Log.debug "End of describe, resetting tree"
+      node.run_state['sensu_spec_tree'] = index == 0 ? [] : node.run_state['sensu_spec_tree'][0..index-1]
       Chef::Log.debug "Current tree #{node.run_state['sensu_spec_tree']}"
     end
 

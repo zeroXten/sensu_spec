@@ -6,6 +6,14 @@ define /(?:must fail|fails) with message ['"]?(?<message>.*?)['"]?/ do
   EOF
 end
 
+define /(?:must pass|passes) with message ['"]?(?<message>.*?)['"]?/ do
+  command 'always-ok ":::message:::"'
+  code <<-EOF
+    #!/bin/bash
+    echo "OK - $1"; exit 0
+  EOF
+end
+
 define /must have command (?<name>.*)/ do
   command 'check-command :::name:::'
   code <<-EOF
