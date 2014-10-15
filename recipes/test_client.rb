@@ -1,5 +1,15 @@
 include_recipe 'sensu_spec::client'
 
+include_recipe 'sensu'
+package "git"
+git "/opt/sensu-community-plugins" do
+  repository "https://github.com/sensu/sensu-community-plugins.git"
+end
+
+define /must run a community plugin/ do
+  command '/opt/sensu-community-plugins/plugins/system/check-disk.rb'
+end
+
 describe 'sensu_spec test' do
 
   describe 'three levels deep' do
@@ -56,5 +66,9 @@ describe 'sensu_spec test' do
   describe 'with override' do
     it 'must pass with message "badger"'
     with interval: 120
+  end
+
+  describe 'community plugin' do
+    it 'must run a community plugin'
   end
 end

@@ -37,7 +37,7 @@ class SensuSpec:
     path.append('/usr/lib64/nagios/plugins')
 
     if os.path.isdir('/opt/sensu/embedded/bin'):
-      path.append('/opt/sensu/embedded/bin')
+      path.insert(0, '/opt/sensu/embedded/bin')
 
     os.putenv('PATH', ":".join(path))
 

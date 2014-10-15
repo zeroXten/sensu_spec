@@ -8,3 +8,4 @@
 #
 
 include_recipe "sensu_spec::client"
+include_recipe "sensu_spec::definitions"
