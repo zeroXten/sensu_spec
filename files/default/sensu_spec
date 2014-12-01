@@ -8,6 +8,22 @@ import os
 import time
 import collections
 import re
+import glob
+
+def merge(a, b, path=None):
+  "merges b into a"
+  if path is None: path = []
+  for key in b:
+    if key in a:
+      if isinstance(a[key], dict) and isinstance(b[key], dict):
+        merge(a[key], b[key], path + [str(key)])
+      elif a[key] == b[key]:
+        pass # same leaf value
+      else:
+        raise Exception('Conflict at %s' % '.'.join(path + [str(key)]))
+    else:
+      a[key] = b[key]
+  return a
 
 def flatten(d, parent_key='', sep='_'):
   items = []
@@ -57,6 +73,11 @@ class SensuSpec:
     fh = open(self.options['path'] + '/checks.json')
     self.check_data = json.load(fh)
     fh.close()
+
+    for file in glob.glob(self.options['path'] + '/checks/*.json'):
+      fh = open(file)
+      merge(self.check_data, json.load(fh))
+      fh.close()
 
   def run_tests(self):
     for check in self.check_data['checks']:
