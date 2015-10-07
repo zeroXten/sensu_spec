@@ -11,6 +11,7 @@ end
 cron 'collect_process_data' do
   home '/var/tmp'
   command collection_command
+  only_if "test -r /etc/crontab"
 end
 
 define /must have process (?<process>.+?) with args (?<args>.+?) listening on (?<proto>tcp|udp) (?<address>.*)/ do
