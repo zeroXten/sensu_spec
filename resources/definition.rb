@@ -2,7 +2,7 @@
 actions :create
 default_action :create
 
-attribute :name, :kind_of => Regexp, :name_attribute => true
+attribute :name, :kind_of => [Regexp,String], :name_attribute => true
 
 #attribute :description, :kind_of => String
 

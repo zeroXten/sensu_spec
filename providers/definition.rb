@@ -11,10 +11,17 @@ end
 action :create do
   node.run_state[:sensu_definitions] ||= {}
 
+  if new_resource.name.kind_of? String
+    pattern = /new_resource.name/
+  else
+    pattern = new_resource.name
+  end
+  log pattern.class
+
   ruby_block "create definition #{new_resource.name}" do
     block do 
 
-      definition = { :pattern => new_resource.name, :command => new_resource.command }
+      definition = { :pattern => pattern, :command => new_resource.command }
       name = definition[:pattern].to_s.gsub(/[^\w]/,'')
 
       Chef::Log.debug "Creating sensu_spec definition: #{definition[:pattern]}"
