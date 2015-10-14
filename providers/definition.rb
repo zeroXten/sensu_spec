@@ -12,13 +12,12 @@ action :create do
   node.run_state[:sensu_definitions] ||= {}
 
   if new_resource.name.kind_of? String
-    pattern = /new_resource.name/
+    pattern = /#{new_resource.name}/
   else
     pattern = new_resource.name
   end
-  log pattern.class
 
-  ruby_block "create definition #{new_resource.name}" do
+  ruby_block "create definition #{pattern.to_s}" do
     block do 
 
       definition = { :pattern => pattern, :command => new_resource.command }
