@@ -4,7 +4,7 @@ collection_command = 'n=$(/bin/netstat -npl 2>&1); echo "$n" > /var/tmp/netstat-
 # Run the first time if required
 bash 'collect_process_data' do
   cwd '/var/tmp'
-  command collection_command
+  code collection_command
   not_if "test -r /var/tmp/netstat-output && test -r /var/tmp/ps-output"
 end
 
