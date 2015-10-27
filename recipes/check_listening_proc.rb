@@ -6,12 +6,15 @@ bash 'collect_process_data' do
   cwd '/var/tmp'
   code collection_command
   not_if "test -r /var/tmp/netstat-output && test -r /var/tmp/ps-output"
+  action :nothing
 end
+
 
 cron 'collect_process_data' do
   home '/var/tmp'
   command collection_command
   only_if "test -r /etc/crontab"
+  notifies :run, 'bash[collect_process_data]', :delayed
 end
 
 define /must have process (?<process>.+?) with args (?<args>.+?) listening on (?<proto>tcp|udp) (?<address>.*)/ do
